@@ -38,7 +38,6 @@ const HomeScreen = () => {
             });
 
             const data = response.data;
-            console.log(data);
 
             setHabits(data);
         } catch (error) {
