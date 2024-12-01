@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const RegisterPage = () => {
@@ -8,14 +8,11 @@ const RegisterPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    console.log(process.env.REACT_APP_THE_LINK);
-    
-  },[])
+  const backendUrl = process.env.REACT_APP_THE_LINK;
 
   const handleRegister = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_THE_LINK}/api/auth/register`, {
+      const response = await fetch(`${backendUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -11,6 +11,8 @@ const HomeScreen = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate()
 
+    const backendUrl = process.env.REACT_APP_THE_LINK;
+
     useEffect(() => {
         if (token) {
             setIsLoggedIn(true);
@@ -24,7 +26,7 @@ const HomeScreen = () => {
 
     const fetchHabits = async () => {
         try {
-          const response = await fetch(`${process.env.REACT_APP_THE_LINK}/api/habits`, {
+          const response = await fetch(`${backendUrl}/api/habits`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -50,7 +52,7 @@ const HomeScreen = () => {
         if (newHabit.trim()) {
             const newHabitData = { name: newHabit };
 
-            const response = await fetch(`${process.env.REACT_APP_THE_LINK}/api/habits`, {
+            const response = await fetch(`${backendUrl}/api/habits`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,7 +69,7 @@ const HomeScreen = () => {
     };
 
     const removeHabit = async (id, theid) => {
-        await fetch(`${process.env.REACT_APP_THE_LINK}/api/habits/${theid}`, {
+        await fetch(`${backendUrl}/api/habits/${theid}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -82,7 +84,7 @@ const HomeScreen = () => {
         const habit = habits.find((habit) => habit._id === theid);
         const updatedHabit = { ...habit, completed: !habit.completed };
 
-        const response = await fetch(`${process.env.REACT_APP_THE_LINK}/api/habits/${theid}`, {
+        const response = await fetch(`${backendUrl}/api/habits/${theid}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
