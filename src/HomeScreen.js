@@ -3,6 +3,7 @@ import './App.css';
 import Habit from './Habit';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
 
 const HomeScreen = () => {
 
@@ -26,14 +27,18 @@ const HomeScreen = () => {
     }, [token]);
 
     const fetchHabits = async () => {
+        const decoded = jwtDecode(token);
+
         try {
             const response = await axios.get(`${backendUrl}/api/habits`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                }
+                },
+                params: { userId: decoded.userId },
             });
 
             const data = response.data;
+            console.log(data);
 
             setHabits(data);
         } catch (error) {
@@ -46,12 +51,12 @@ const HomeScreen = () => {
 
     const addHabit = async () => {
         try {
+            const decoded = jwtDecode(token);
+            const userId = decoded.userId
             if (newHabit.trim()) {
-                const newHabitData = { name: newHabit };
+                const newHabitData = { name: newHabit, userId: userId };
 
-                const response = await axios.post(
-                    `${backendUrl}/api/habits`,
-                    newHabitData,
+                const response = await axios.post(`${backendUrl}/api/habits`, newHabitData,
                     {
                         headers: {
                             'Content-Type': 'application/json',
@@ -77,11 +82,14 @@ const HomeScreen = () => {
 
 
     const removeHabit = async (id, theid) => {
+        const decoded = jwtDecode(token);
+        const userId = decoded.userId
         try {
             await axios.delete(`${backendUrl}/api/habits/${theid}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                }
+                },
+                params: { userId: userId }
             });
 
             setHabits(habits.filter((habit) => habit._id !== theid));
@@ -93,6 +101,8 @@ const HomeScreen = () => {
     };
 
     const toggleCompletion = async (id, theid) => {
+        const decoded = jwtDecode(token);
+        const userId = decoded.userId
         try {
             const habit = habits.find((habit) => habit._id === theid);
 
@@ -105,7 +115,8 @@ const HomeScreen = () => {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
-                    }
+                    },
+                    params: { userId: userId }
                 }
             );
 
