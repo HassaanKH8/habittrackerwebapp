@@ -7,9 +7,12 @@ const LoginPage = ({ setToken, setIsLoggedIn }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
+    const backendUrl = process.env.REACT_APP_THE_LINK;
+
+
     const handleLogin = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_THE_LINK}/api/auth/login`, {
+            const response = await fetch(`${backendUrl}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
