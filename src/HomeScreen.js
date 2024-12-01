@@ -48,25 +48,35 @@ const HomeScreen = () => {
       };
       
 
-    const addHabit = async () => {
-        if (newHabit.trim()) {
-            const newHabitData = { name: newHabit };
-
-            const response = await fetch(`${backendUrl}/api/habits`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify(newHabitData),
-            });
-
-            const data = await response.json();
-
-            setHabits((prevHabits) => [...prevHabits, data]);
-            setNewHabit('');
+      const addHabit = async () => {
+        try {
+            if (newHabit.trim()) {
+                const newHabitData = { name: newHabit };
+    
+                const response = await fetch(`${backendUrl}/api/habits`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(newHabitData),
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Failed to add habit. Status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+    
+                setHabits((prevHabits) => [...prevHabits, data]);
+                setNewHabit('');
+            }
+        } catch (error) {
+            console.error('Error adding habit:', error);
+            alert('There was an error adding your habit. Please try again later.');
         }
     };
+    
 
     const removeHabit = async (id, theid) => {
         await fetch(`${backendUrl}/api/habits/${theid}`, {
@@ -76,8 +86,6 @@ const HomeScreen = () => {
             },
         });
         setHabits(habits.filter((habit) => habit._id !== theid));
-        console.log(theid);
-
     };
 
     const toggleCompletion = async (id, theid) => {
