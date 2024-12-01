@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const LoginPage = ({ setToken, setIsLoggedIn }) => {
     const [email, setEmail] = useState('');
@@ -9,37 +10,36 @@ const LoginPage = ({ setToken, setIsLoggedIn }) => {
 
     const backendUrl = process.env.REACT_APP_THE_LINK;
 
-
     const handleLogin = async () => {
         try {
-            const response = await fetch(`${backendUrl}/api/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
+            const response = await axios.post(`${backendUrl}/api/auth/login`, {
+                email,
+                password
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                setErrorMessage(errorData.message || 'Invalid login');
-                return;
-            }
+            const data = response.data;
 
-            const data = await response.json();
             if (data.token) {
                 localStorage.setItem('token', data.token);
                 setToken(data.token);
                 setIsLoggedIn(true);
-                navigate("/")
+                navigate("/");
             } else {
                 setErrorMessage('Invalid login');
             }
         } catch (error) {
-            setErrorMessage('An error occurred. Please try again later.');
+            if (error.response) {
+                setErrorMessage(error.response.data.message || 'Invalid login');
+            } else if (error.request) {
+                setErrorMessage('An error occurred. Please try again later.');
+            } else {
+                setErrorMessage('An error occurred. Please try again later.');
+            }
+
             console.error('Login error:', error);
         }
     };
+
 
     return (
         <div className='page'>
@@ -81,7 +81,7 @@ const LoginPage = ({ setToken, setIsLoggedIn }) => {
                         <button type="submit" className='lbtn2'>Login</button>
                     </div>
                 </form>
-                <p onClick={()=>{navigate('/register')}} style={{marginTop: '10px', fontFamily:"EB Garamond", fontWeight: 400, fontSize: '16px', color: '#36454f', cursor: 'pointer'}}>Don't have an account? Register</p>
+                <p onClick={() => { navigate('/register') }} style={{ marginTop: '10px', fontFamily: "EB Garamond", fontWeight: 400, fontSize: '16px', color: '#36454f', cursor: 'pointer' }}>Don't have an account? Register</p>
             </div>
         </div>
     );

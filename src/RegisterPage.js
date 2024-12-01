@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const RegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -12,29 +13,28 @@ const RegisterPage = () => {
 
   const handleRegister = async () => {
     try {
-      const response = await fetch(`${backendUrl}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
+      const response = await axios.post(`${backendUrl}/api/auth/register`, {
+        username,
+        email,
+        password
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        setErrorMessage(errorData.message || 'Registration failed');
-        return;
-      }
+      const data = response.data;
 
-      const data = await response.json();
       if (data.token) {
         localStorage.setItem('token', data.token);
-        navigate('/login')
+        navigate('/login');
       } else {
         setErrorMessage('Registration failed');
       }
     } catch (error) {
-      setErrorMessage('An error occurred. Please try again later.');
+      if (error.response) {
+        setErrorMessage(error.response.data.message || 'Registration failed');
+      } else if (error.request) {
+        setErrorMessage('An error occurred. Please try again later.');
+      } else {
+        setErrorMessage('An error occurred. Please try again later.');
+      }
       console.error('Registration error:', error);
     }
   };
@@ -89,7 +89,7 @@ const RegisterPage = () => {
             <button type="submit" className='lbtn2'>Register</button>
           </div>
         </form>
-        <p onClick={()=>{navigate('/login')}} style={{marginTop: '10px', fontFamily:"EB Garamond", fontWeight: 400, fontSize: '16px', color: '#36454f', cursor: 'pointer'}}>Already have an account? Login</p>
+        <p onClick={() => { navigate('/login') }} style={{ marginTop: '10px', fontFamily: "EB Garamond", fontWeight: 400, fontSize: '16px', color: '#36454f', cursor: 'pointer' }}>Already have an account? Login</p>
 
       </div>
     </div>

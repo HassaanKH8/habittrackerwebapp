@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import Habit from './Habit';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const HomeScreen = () => {
 
@@ -26,85 +27,99 @@ const HomeScreen = () => {
 
     const fetchHabits = async () => {
         try {
-          const response = await fetch(`${backendUrl}/api/habits`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-      
-          if (!response.ok) {
-            // If the response is not OK, throw an error
-            throw new Error('Failed to fetch habits');
-          }
-      
-          const data = await response.json();
-          setHabits(data);
-      
-        } catch (error) {
-          console.error('Error fetching habits:', error);
-          alert('There was an error fetching your habits. Please try again.');
-        }
-      };
-      
+            const response = await axios.get(`${backendUrl}/api/habits`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
 
-      const addHabit = async () => {
+            const data = response.data;
+
+            setHabits(data);
+        } catch (error) {
+            console.error('Error fetching habits:', error);
+
+            alert('There was an error fetching your habits. Please try again.');
+        }
+    };
+
+
+    const addHabit = async () => {
         try {
             if (newHabit.trim()) {
                 const newHabitData = { name: newHabit };
-    
-                const response = await fetch(`${backendUrl}/api/habits`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(newHabitData),
-                });
-    
-                if (!response.ok) {
-                    throw new Error(`Failed to add habit. Status: ${response.status}`);
-                }
-    
-                const data = await response.json();
-    
+
+                const response = await axios.post(
+                    `${backendUrl}/api/habits`,
+                    newHabitData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                        }
+                    }
+                );
+                const data = response.data;
+
                 setHabits((prevHabits) => [...prevHabits, data]);
                 setNewHabit('');
             }
         } catch (error) {
             console.error('Error adding habit:', error);
-            alert('There was an error adding your habit. Please try again later.');
+
+            if (error.response) {
+                alert(error.response.data.message || 'There was an error adding your habit. Please try again later.');
+            } else {
+                alert('There was an error adding your habit. Please try again later.');
+            }
         }
     };
-    
+
 
     const removeHabit = async (id, theid) => {
-        await fetch(`${backendUrl}/api/habits/${theid}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-        setHabits(habits.filter((habit) => habit._id !== theid));
+        try {
+            await axios.delete(`${backendUrl}/api/habits/${theid}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            setHabits(habits.filter((habit) => habit._id !== theid));
+        } catch (error) {
+            console.error('Error removing habit:', error);
+
+            alert('There was an error removing your habit. Please try again later.');
+        }
     };
 
     const toggleCompletion = async (id, theid) => {
-        const habit = habits.find((habit) => habit._id === theid);
-        const updatedHabit = { ...habit, completed: !habit.completed };
+        try {
+            const habit = habits.find((habit) => habit._id === theid);
 
-        const response = await fetch(`${backendUrl}/api/habits/${theid}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify(updatedHabit),
-        });
+            const updatedHabit = { ...habit, completed: !habit.completed };
 
-        const data = await response.json();
-        setHabits(habits.map((habit) => (habit._id === theid ? { ...habit, completed: data.completed } : habit)));
+            const response = await axios.put(
+                `${backendUrl}/api/habits/${theid}`,
+                updatedHabit,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    }
+                }
+            );
+
+            const data = response.data;
+
+            setHabits(habits.map((habit) =>
+                habit._id === theid ? { ...habit, completed: data.completed } : habit
+            ));
+
+        } catch (error) {
+            console.error('Error toggling completion:', error);
+            alert('There was an error updating the habit. Please try again later.');
+        }
     };
-
     const handleLogout = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
@@ -116,8 +131,8 @@ const HomeScreen = () => {
         <div className='page'>
             <div className='navbar'>
                 <h1 className='heading'>Habit Tracker</h1>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <button className='lbtn3' style={{marginRight: "8px"}} onClick={handleLogout}>Logout</button>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <button className='lbtn3' style={{ marginRight: "8px" }} onClick={handleLogout}>Logout</button>
                     <img src={require('./assets/profile.png')} className='profileimg' alt='profileimg' />
                 </div>
             </div>
